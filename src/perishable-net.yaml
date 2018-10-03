@@ -1,0 +1,225 @@
+swagger: "2.0"
+
+info:
+  version: "1.0"
+  title: "Perishable Network"
+
+parameters:
+
+  id:
+    name: id
+    in: path
+    description: ID of the shipment
+    required: true
+    type: string
+    maxLength: 64
+  param:
+    name: param
+    in: path
+    description: Parameter
+    required: true
+    type: string
+    maxLength: 64
+  newstatus:
+    name: newstatus
+    in: path
+    description: New shipment status
+    required: true
+    type: string
+    maxLength: 64
+
+paths:
+
+  /{id}:
+
+    get:
+      operationId: get
+      summary: Get shipment by ID
+      produces:
+      - application/json
+      parameters:
+      - $ref: '#/parameters/id'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+              product:
+                type: string
+              price:
+                type: string
+              fine:
+                type: string
+              status:
+                type: string
+              range:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    param:
+                      type: string
+                    minValue:
+                      type: string
+                    maxValue:
+                      type: string
+        404:
+          description: Not Found
+
+    post:
+      summary: Add a new shipment
+      operationId: create
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - $ref: '#/parameters/id'
+      - in: body
+        name: body
+        description: Shipment atributes
+        required: true
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+            product:
+              type: string
+            price:
+              type: string
+            fine:
+              type: string
+            status:
+              type: string
+            range:
+              type: array
+              items:
+                type: object
+                properties:
+                  param:
+                    type: string
+                  minValue:
+                    type: string
+                  maxValue:
+                    type: string
+      responses:
+        201:
+          description: Shipment Created
+        409:
+          description: Shipment Already Exists
+        500:
+          description: Internal Error  
+    
+    put:
+      operationId: log
+      summary: Log shipment's parameter
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - $ref: '#/parameters/id'
+      - name: body
+        in: body
+        description: Log values
+        required: true
+        schema:
+          type: object
+          properties:
+            param:
+              type: string
+            measure:
+              type: string
+      responses:
+        202:
+          description: Log updated
+        404:
+          description: Not Found
+        500:
+          description: Internal Error
+
+  /{id}/history/{param}:
+
+    get:
+      operationId: history
+      summary: Return shipment's log by param
+      parameters:
+      - $ref: '#/parameters/id'
+      - $ref: '#/parameters/param'      
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              values:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    timestamp:
+                      type: string
+                    measure:
+                      type: string
+        404:
+          description: Not Found
+
+  /{id}/status/{newstatus}:
+
+    put:
+      operationId: updatestat
+      summary: Update shipment status
+      parameters:
+      - $ref: '#/parameters/id'
+      - $ref: '#/parameters/newstatus'      
+      responses:
+        202:
+          description: OK
+        404:
+          description: Not Found
+        500:
+          description: Internal Error  
+
+  /shipments:
+  
+    get:
+      operationId: getall
+      summary: Return all shipments in the channel
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              values:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    product:
+                      type: string
+                    price:
+                      type: string
+                    fine:
+                      type: string
+                    status:
+                      type: string
+                    range:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          param:
+                            type: string
+                          minValue:
+                            type: string
+                          maxValue:
+                            type: string
+        404:
+          description: Not Found
