@@ -83,6 +83,8 @@ func (cc *PerishableNet) Invoke(stub shim.ChaincodeStubInterface) peer.Response 
 		return cc.log(stub, args)
 	case "history":
 		return cc.history(stub, args)
+	case "updatestat":
+		return cc.updatestat(stub, args)
 	case "getall":
 		return cc.getall(stub, args)
 	default:
@@ -134,6 +136,28 @@ func (cc *PerishableNet) log(stub shim.ChaincodeStubInterface, args []string) pe
 	return Success(http.StatusAccepted, "Log Updated", nil)
 }
 
+/**** изменить статус поставки */
+func (cc *PerishableNet) updatestat(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	id := strings.ToLower(args[0])
+	
+	value, err := stub.GetState(id);
+	if err != nil || value == nil {
+		return Error(http.StatusNotFound, "Not Found")
+	}
+
+	var shipment Shipment
+	json.Unmarshal(value, &shipment)
+	shipment.Status = strings.ToLower(args[1])
+	jsonShipment, _ := json.Marshal(shipment)
+
+	if err := stub.PutState(id, []byte(jsonShipment)); err != nil {
+		return Error(http.StatusInternalServerError, err.Error())
+	}
+
+	return Success(http.StatusAccepted, "Shipment Status Updated", nil)
+}
+/****/
+
 func (cc *PerishableNet) history(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	id := strings.ToLower(args[0])
 
@@ -171,7 +195,6 @@ func (cc *PerishableNet) history(stub shim.ChaincodeStubInterface, args []string
 
 func (cc *PerishableNet) getall(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	// queryString := "{ \"selector\": { \"product\":  { \"$in\": [\"bananas\", \"apples\", \"pears\", \"oranges\"] } } }"
-
 	queryString := `{
 		"selector": {
 			"$or": [
@@ -206,16 +229,3 @@ func (cc *PerishableNet) getall(stub shim.ChaincodeStubInterface, args []string)
 	resultJson, _ := json.Marshal(results.Shipments)
 	return Success(200, "OK", resultJson)
 }
-
-/**** создать функцию updatestat для изменения статуса поставки ****
-func (cc *PerishableNet) updatestat(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	// получить ID поставки (первый аргумент) и преобразовать его в строковый тип (strings.ToLower)
-	// по ID проверить существование поставки с данным ID и если поставка существует получить объект в формате json  (GetState)
-	// создать переменую типа Shipment
-	// скопировать объект поставки в json формате в пермеменную типа Shipment (json.Unmarshal)
-	// изменить статус поставки на новый (второй аргумент) и сформировать поставки в формате json с новым статусом (json.Marshal)
-	// записать поставку в канал (PutState)
-	// вернуть код успеха или ошибки (return Success | return Error)
-	// не забыть добавить вызов функции в метод Invoke
-}
-****/
