@@ -136,27 +136,18 @@ func (cc *PerishableNet) log(stub shim.ChaincodeStubInterface, args []string) pe
 	return Success(http.StatusAccepted, "Log Updated", nil)
 }
 
-/**** изменить статус поставки */
 func (cc *PerishableNet) updatestat(stub shim.ChaincodeStubInterface, args []string) peer.Response {
-	id := strings.ToLower(args[0])
-	
-	value, err := stub.GetState(id);
-	if err != nil || value == nil {
-		return Error(http.StatusNotFound, "Not Found")
-	}
-
-	var shipment Shipment
-	json.Unmarshal(value, &shipment)
-	shipment.Status = strings.ToLower(args[1])
-	jsonShipment, _ := json.Marshal(shipment)
-
-	if err := stub.PutState(id, []byte(jsonShipment)); err != nil {
-		return Error(http.StatusInternalServerError, err.Error())
-	}
-
-	return Success(http.StatusAccepted, "Shipment Status Updated", nil)
+	/**** изменить статус поставки */
+	// получить ID поставки (первый аргумент) и преобразовать его в строковый тип (strings.ToLower)
+	// по ID проверить существование поставки с данным ID и если поставка существует получить объект в формате json  (GetState)
+	// создать переменую типа Shipment
+	// скопировать объект поставки в json формате в пермеменную типа Shipment (json.Unmarshal)
+	// изменить статус поставки на новый (второй аргумент) и сформировать поставки в формате json с новым статусом (json.Marshal)
+	// записать поставку в канал (PutState)
+	// вернуть код успеха или ошибки (return Success | return Error)
+	// не забыть добавить вызов функции в метод Invoke	
+	/****/
 }
-/****/
 
 func (cc *PerishableNet) history(stub shim.ChaincodeStubInterface, args []string) peer.Response {
 	id := strings.ToLower(args[0])
